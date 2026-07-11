@@ -36,32 +36,14 @@ LDFLAGS = -m elf_x86_64 -nostdlib -static -no-pie -Ttext=0x40000000 \
 
 APPS    = lua.elf
 
-all: bootstrap-sdk $(APPS)
-
-.PHONY: bootstrap-sdk
-bootstrap-sdk:
-ifdef BOOTSTRAP_SDK
-	@if [ ! -f "$(BOOTSTRAP_SDK)/lib/libc.a" ]; then \
-		if [ -d "../libc" ]; then \
-			echo "[STANDALONE] Peer libc found at ../libc. Building standard SDK..."; \
-			$(MAKE) -C ../libc SDK_DIR=$(BOOTSTRAP_SDK) install; \
-		else \
-			echo "[STANDALONE] SDK and peer libc not found. Fetching libc from GitHub..."; \
-			mkdir -p build; \
-			if [ ! -d "build/libc_src" ]; then \
-				git clone https://github.com/boredos/libc.git build/libc_src; \
-			fi; \
-			$(MAKE) -C build/libc_src SDK_DIR=$(BOOTSTRAP_SDK) install; \
-		fi \
-	fi
-endif
+all: $(APPS)
 
 obj/lua_onelua.o: src/boredos_onelua.c
 	@mkdir -p obj
 	$(CC) $(LUA_CFLAGS) -c $< -o $@
 
 lua.elf: obj/lua_onelua.o
-	$(LD) $(LDFLAGS) $(SDK_PATH)/lib/crt0.o $< -lc -o $@
+	$(LD) $(LDFLAGS) $(SDK_PATH)/lib/crt0.o $(SDK_PATH)/lib/crti.o $< -lc $(SDK_PATH)/lib/crtn.o -o $@
 
 install: all
 	mkdir -p $(DESTDIR)/bin
@@ -76,7 +58,7 @@ bup: all
 	@echo 'version = "5.4.4"' >> build/package/MANIFEST.toml
 	@echo '[install]' >> build/package/MANIFEST.toml
 	@echo 'bin = "/bin"' >> build/package/MANIFEST.toml
-	mkdir -p build
+	x86_64-elf-strip --strip-unneeded build/package/bin/*.elf 2>/dev/null || true
 	tar -cf build/lua.tar -C build/package MANIFEST.toml bin
 	lz4 -f build/lua.tar build/lua.bup
 	rm -f build/lua.tar
