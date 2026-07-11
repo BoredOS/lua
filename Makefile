@@ -1,8 +1,8 @@
 # Copyright (c) 2026 Christiaan (chris@boreddev.nl)
 # Lua Standalone Makefile
 
-CC = x86_64-elf-gcc
-LD = x86_64-elf-ld
+CC = x86_64-boredos-gcc
+LD = x86_64-boredos-ld
 
 ifneq ($(BOREDOS_SDK),)
   ifeq ($(wildcard $(BOREDOS_SDK)/lib/libc.a),)
@@ -58,7 +58,7 @@ bup: all
 	@echo 'version = "5.4.4"' >> build/package/MANIFEST.toml
 	@echo '[install]' >> build/package/MANIFEST.toml
 	@echo 'bin = "/bin"' >> build/package/MANIFEST.toml
-	x86_64-elf-strip --strip-unneeded build/package/bin/*.elf 2>/dev/null || true
+	x86_64-boredos-strip --strip-unneeded build/package/bin/*.elf 2>/dev/null || true
 	tar -cf build/lua.tar -C build/package MANIFEST.toml bin
 	lz4 -f build/lua.tar build/lua.bup
 	rm -f build/lua.tar
