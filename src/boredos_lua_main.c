@@ -1,7 +1,7 @@
 /*
 ** BoredOS Lua 5.5.0 main / REPL
 ** Replaces the standard lua.c with BoredOS-native I/O.
-** Uses sys_write() for output and sys_tty_read_in() for input.
+** Uses sys_write() for output and read(0) for input.
 */
 
 #include "lua.h"
@@ -104,13 +104,15 @@ static int dostring(lua_State *L, const char *s, const char *name) {
     return dochunk(L, luaL_loadbuffer(L, s, strlen(s), name));
 }
 
-/* BoredOS-specific readline: uses sys_tty_read_in for line input */
+#include <unistd.h>
+
+/* BoredOS-specific readline: uses read(0, ...) for line input */
 static char *boredos_readline(char *buff, const char *prompt) {
     /* Write the prompt */
     sys_write(1, prompt, (int)strlen(prompt));
 
     /* Read a line */
-    int n = sys_tty_read_in(buff, LUA_MAXINPUT - 1);
+    int n = read(0, buff, LUA_MAXINPUT - 1);
     if (n <= 0) return NULL;
     buff[n] = '\0';
     return buff;

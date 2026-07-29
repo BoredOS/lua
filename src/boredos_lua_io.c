@@ -290,10 +290,12 @@ static int io_write(lua_State *L) {
     return 1;
 }
 
+#include <unistd.h>
+
 static int io_read_stdin(lua_State *L) {
     /* Read a line from stdin using BoredOS TTY */
     char buf[1024];
-    int n = sys_tty_read_in(buf, sizeof(buf) - 1);
+    int n = read(0, buf, sizeof(buf) - 1);
     if (n <= 0) {
         lua_pushnil(L);
         return 1;
