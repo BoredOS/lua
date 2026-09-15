@@ -15,7 +15,7 @@ LUA_CFLAGS = -std=gnu11 -O2 -fno-stack-protector -fno-stack-check \
 
 LDFLAGS = -Wl,-z,max-page-size=0x1000 -Wl,-dynamic-linker,/usr/lib/ld.so -Wl,-rpath,/usr/lib:/lib -lm
 
-APPS    = lua.elf
+APPS    = lua
 
 all: $(APPS)
 
@@ -23,7 +23,7 @@ obj/lua_onelua.o: src/boredos_onelua.c
 	@mkdir -p obj
 	$(CC) $(LUA_CFLAGS) -c $< -o $@
 
-lua.elf: obj/lua_onelua.o
+lua: obj/lua_onelua.o
 	$(CC) $< $(LDFLAGS) -o $@
 
 install: all
@@ -34,12 +34,12 @@ install: all
 bup: all
 	rm -rf build/package
 	mkdir -p build/package/bin
-	cp lua.elf build/package/bin/
+	cp $(APPS) build/package/bin/
 	@echo 'name = "lua"' > build/package/MANIFEST.toml
 	@echo 'version = "5.4.4"' >> build/package/MANIFEST.toml
 	@echo '[install]' >> build/package/MANIFEST.toml
 	@echo 'bin = "/bin"' >> build/package/MANIFEST.toml
-	x86_64-boredos-strip --strip-unneeded build/package/bin/*.elf 2>/dev/null || true
+	x86_64-boredos-strip --strip-unneeded build/package/bin/* 2>/dev/null || true
 	tar -cf build/lua.tar -C build/package MANIFEST.toml bin
 	lz4 -f build/lua.tar build/lua.bup
 	rm -f build/lua.tar

@@ -17,11 +17,11 @@ If cloned completely separately in isolation, running `make` will **automaticall
 ```bash
 make
 ```
-If `build/sdk` is missing, the Makefile automatically clones the pure standard library dependency from `https://github.com/boredos/libc.git`, compiles it, installs it to `build/sdk`, and builds `lua.elf` standalone!
+If `build/sdk` is missing, the Makefile automatically clones the pure standard library dependency from `https://github.com/boredos/libc.git`, compiles it, installs it to `build/sdk`, and builds `lua` standalone!
 
 ## Staging Installation
 To stage the Lua executable into your target initrd root filesystem directory:
 ```bash
 make DESTDIR=/path/to/initrd/root install
 ```
-- Binary is routed to `/bin/lua.elf`
+- Binary is routed to `/bin/lua`
